@@ -29,12 +29,18 @@ namespace Braintree
 
         public Result<PaymentMethod> Update(string token, PaymentMethodRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             var response = new NodeWrapper(service.Put(service.MerchantPath() + "/payment_methods/any/" + token, request));
             return ExtractResultFromResponse(response);
         }
 
         public async Task<Result<PaymentMethod>> UpdateAsync(string token, PaymentMethodRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             var response = new NodeWrapper(await service.PutAsync(service.MerchantPath() + "/payment_methods/any/" + token, request).ConfigureAwait(false));
             return ExtractResultFromResponse(response);
         }
@@ -46,12 +52,18 @@ namespace Braintree
 
         public async Task<Result<PaymentMethod>> DeleteAsync(string token)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             var response = new NodeWrapper(await service.DeleteAsync(service.MerchantPath() + "/payment_methods/any/" + token).ConfigureAwait(false));
             return new ResultImpl<UnknownPaymentMethod>(response, gateway);
         }
 
         public Result<PaymentMethod> Delete(string token, PaymentMethodDeleteRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             string queryString = (request == null ? "" : "?" + request.ToQueryString());
 
             var response = new NodeWrapper(service.Delete(service.MerchantPath() + "/payment_methods/any/" + token + queryString));
@@ -60,7 +72,7 @@ namespace Braintree
 
         public PaymentMethod Find(string token)
         {
-            if(token == null || token.Trim().Equals(""))
+            if(StringUtil.IsInvalidPathSegment(token))
                 throw new NotFoundException();
 
             var response = new NodeWrapper(service.Get(service.MerchantPath() + "/payment_methods/any/" + token));
@@ -69,7 +81,7 @@ namespace Braintree
 
         public async Task<PaymentMethod> FindAsync(string token)
         {
-            if(token == null || token.Trim().Equals(""))
+            if(StringUtil.IsInvalidPathSegment(token))
                 throw new NotFoundException();
 
             var response = new NodeWrapper(await service.GetAsync(service.MerchantPath() + "/payment_methods/any/" + token).ConfigureAwait(false));

@@ -1,3 +1,4 @@
+using Braintree.Exceptions;
 using System.Xml;
 
 namespace Braintree
@@ -16,6 +17,9 @@ namespace Braintree
 
         public UsBankAccount Find(string token)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             XmlNode xml = service.Get(service.MerchantPath() + "/payment_methods/us_bank_account/" + token);
 
             return new UsBankAccount(new NodeWrapper(xml));

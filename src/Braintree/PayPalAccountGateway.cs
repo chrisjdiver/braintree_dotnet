@@ -1,3 +1,4 @@
+using Braintree.Exceptions;
 using System.Xml;
 
 namespace Braintree
@@ -16,6 +17,9 @@ namespace Braintree
 
         public PayPalAccount Find(string token)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             XmlNode xml = service.Get(service.MerchantPath() + "/payment_methods/paypal_account/" + token);
 
             return new PayPalAccount(new NodeWrapper(xml), gateway);
@@ -23,11 +27,17 @@ namespace Braintree
 
         public void Delete(string token)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             service.Delete(service.MerchantPath() + "/payment_methods/paypal_account/" + token);
         }
 
         public Result<PayPalAccount> Update(string token, PayPalAccountRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             XmlNode xml = service.Put(service.MerchantPath() + "/payment_methods/paypal_account/" + token, request);
             return new ResultImpl<PayPalAccount>(new NodeWrapper(xml), gateway);
         }

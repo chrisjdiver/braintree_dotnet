@@ -31,7 +31,7 @@ namespace Braintree
 
         public virtual CreditCardVerification Find(string Id)
         {
-            if (Id == null || Id.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(Id))
             {
                 throw new NotFoundException();
             }

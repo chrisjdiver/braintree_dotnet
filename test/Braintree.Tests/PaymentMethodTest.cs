@@ -105,6 +105,7 @@ namespace Braintree.Tests
                     DirectoryResponse = "some-directory-response",
                     DsTransactionId = "some-ds-transaction-id",
                     EciFlag = "05",
+                    Network = ThreeDSecurePassThruNetwork.EFTPOS,
                     ThreeDSecureVersion = "2.2.0",
                     Xid = "some-xid"
                 }
@@ -123,6 +124,7 @@ namespace Braintree.Tests
             Assert.IsTrue(xml.Contains("<directory_response>some-directory-response</directory_response>"));
             Assert.IsTrue(xml.Contains("<ds_transaction_id>some-ds-transaction-id</ds_transaction_id>"));
             Assert.IsTrue(xml.Contains("<eci-flag>05</eci-flag>"));
+            Assert.IsTrue(xml.Contains("<network>eftpos</network>"));
             Assert.IsTrue(xml.Contains("<three-d-secure-version>2.2.0</three-d-secure-version>"));
             Assert.IsTrue(xml.Contains("<xid>some-xid</xid>"));
         }

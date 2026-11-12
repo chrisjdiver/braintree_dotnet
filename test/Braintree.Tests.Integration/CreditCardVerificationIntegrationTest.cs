@@ -355,6 +355,73 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
+        public void Create3DSPassThruWithNetwork_ReturnsSuccessfulResponse()
+        {
+            var request = new CreditCardVerificationRequest
+            {
+                CreditCard = new CreditCardVerificationCreditCardRequest
+                {
+                    Number = SandboxValues.CreditCardNumber.VISA,
+                    ExpirationDate = "05/2029",
+                },
+                Options = new CreditCardVerificationOptionsRequest
+                {
+                    MerchantAccountId = MerchantAccountIDs.THREE_D_SECURE_MERCHANT_ACCOUNT_ID,
+                },
+                ThreeDSecurePassThru = new ThreeDSecurePassThruRequest()
+                {
+                    EciFlag = "05",
+                    Cavv = "some-cavv",
+                    Xid = "some-xid",
+                    ThreeDSecureVersion = "2.2.0",
+                    DsTransactionId = "some-ds-transaction-id",
+                    AuthenticationResponse = "some-auth-response",
+                    DirectoryResponse = "some-directory-response",
+                    CavvAlgorithm = "algorithm",
+                    Network = ThreeDSecurePassThruNetwork.VISA
+                }
+            };
+
+            Result<CreditCardVerification> result = gateway.CreditCardVerification.Create(request);
+            Assert.IsTrue(result.IsSuccess());
+        }
+
+        [Test]
+        public void Create3DSPassThruWithNetworkThatDoesNotMatchPaymentInstrument_ReturnsError()
+        {
+            var request = new CreditCardVerificationRequest
+            {
+                CreditCard = new CreditCardVerificationCreditCardRequest
+                {
+                    Number = SandboxValues.CreditCardNumber.VISA,
+                    ExpirationDate = "05/2029",
+                },
+                Options = new CreditCardVerificationOptionsRequest
+                {
+                    MerchantAccountId = MerchantAccountIDs.THREE_D_SECURE_MERCHANT_ACCOUNT_ID,
+                },
+                ThreeDSecurePassThru = new ThreeDSecurePassThruRequest()
+                {
+                    EciFlag = "05",
+                    Cavv = "some-cavv",
+                    Xid = "some-xid",
+                    ThreeDSecureVersion = "2.2.0",
+                    DsTransactionId = "some-ds-transaction-id",
+                    AuthenticationResponse = "some-auth-response",
+                    DirectoryResponse = "some-directory-response",
+                    CavvAlgorithm = "algorithm",
+                    Network = ThreeDSecurePassThruNetwork.MASTER_CARD
+                }
+            };
+
+            Result<CreditCardVerification> result = gateway.CreditCardVerification.Create(request);
+            Assert.IsFalse(result.IsSuccess());
+            Assert.AreEqual(
+                ValidationErrorCode.VERIFICATION_THREE_D_SECURE_NETWORK_DOES_NOT_MATCH_PAYMENT_INSTRUMENT,
+                result.Errors.ForObject("Verification").OnField("Network")[0].Code);
+        }
+
+        [Test]
         public void Create_ReturnsSuccessfulResponseWithNetworkResponseCodeText()
         {
             var request = new CreditCardVerificationRequest

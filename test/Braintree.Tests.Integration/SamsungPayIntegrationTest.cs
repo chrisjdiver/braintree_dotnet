@@ -12,7 +12,6 @@ using Params = System.Collections.Generic.Dictionary<string, object>;
 namespace Braintree.Tests.Integration
 {
     [TestFixture]
-    [Ignore("Samsung Pay deprecated TODO - Remove in major release")]
     public class SamsungPayIntegrationTest
     {
         private BraintreeGateway gateway;

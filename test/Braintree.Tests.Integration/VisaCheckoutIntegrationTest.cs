@@ -30,6 +30,7 @@ namespace Braintree.Tests.Integration
         public void SearchByPaymentInstrumentType()
         {
             var searchRequest = new TransactionSearchRequest().
+                Ids.IncludedIn("visacheckout_transaction").
                 PaymentInstrumentType.Is("visa_checkout_card");
 
             var searchResult = gateway.Transaction.Search(searchRequest);

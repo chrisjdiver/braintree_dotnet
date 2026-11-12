@@ -24,7 +24,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("unpend when we have a more stable CI")]
         public void TokenizeRawCreditCardDetailsWithGraphQL_isSuccessful()
         {
             BraintreeGateway gateway = GetGateway();

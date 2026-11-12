@@ -194,13 +194,13 @@ namespace Braintree.Tests.Integration
 
             Address supermanAddress = gateway.Address.Create(superman.Id, supermanAddressRequest).Target;
 
-            Assert.Throws<ArgumentException>(() => gateway.Address.Find(batman.Id, $"../../{superman.Id}/addresses/{supermanAddress.Id}"));
+            Assert.Throws<NotFoundException>(() => gateway.Address.Find(batman.Id, $"../../{superman.Id}/addresses/{supermanAddress.Id}"));
 
-            Assert.Throws<ArgumentException>(() => gateway.Address.Find(batman.Id, $"%2E%2E/%2E%2E/{superman.Id}/addresses/{supermanAddress.Id}"));
+            Assert.Throws<NotFoundException>(() => gateway.Address.Find(batman.Id, $"%2E%2E/%2E%2E/{superman.Id}/addresses/{supermanAddress.Id}"));
 
-            Assert.ThrowsAsync<ArgumentException>(() => gateway.Address.FindAsync(superman.Id, $"../../{batman.Id}/addresses/{batmanAddress.Id}"));
+            Assert.ThrowsAsync<NotFoundException>(() => gateway.Address.FindAsync(superman.Id, $"../../{batman.Id}/addresses/{batmanAddress.Id}"));
 
-            Assert.ThrowsAsync<ArgumentException>(() => gateway.Address.FindAsync(superman.Id, $"%2E%2E/%2E%2E/{batman.Id}/addresses/{batmanAddress.Id}"));
+            Assert.ThrowsAsync<NotFoundException>(() => gateway.Address.FindAsync(superman.Id, $"%2E%2E/%2E%2E/{batman.Id}/addresses/{batmanAddress.Id}"));
         }
     }
     

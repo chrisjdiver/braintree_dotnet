@@ -25,7 +25,7 @@ namespace Braintree
 
         public virtual Customer Find(string Id)
         {
-            if(Id == null || Id.Trim().Equals(""))
+            if(StringUtil.IsInvalidPathSegment(Id))
                 throw new NotFoundException();
 
             XmlNode customerXML = service.Get(service.MerchantPath() + "/customers/" + Id);
@@ -35,10 +35,10 @@ namespace Braintree
 
         public virtual Customer Find(string Id, string AssociationFilterId)
         {
-            if(Id == null || Id.Trim().Equals(""))
+            if(StringUtil.IsInvalidPathSegment(Id))
                 throw new NotFoundException();
 
-            if(AssociationFilterId == null || AssociationFilterId.Trim().Equals(""))
+            if(StringUtil.IsInvalidPathSegment(AssociationFilterId))
                 throw new NotFoundException();
 
             string queryParams = "?association_filter_id=" + AssociationFilterId;
@@ -50,7 +50,7 @@ namespace Braintree
 
         public virtual async Task<Customer> FindAsync(string Id)
         {
-            if(Id == null || Id.Trim().Equals(""))
+            if(StringUtil.IsInvalidPathSegment(Id))
                 throw new NotFoundException();
 
             XmlNode customerXML = await service.GetAsync(service.MerchantPath() + "/customers/" + Id).ConfigureAwait(false);
@@ -84,6 +84,9 @@ namespace Braintree
 
         public virtual Result<Customer> Delete(string Id)
         {
+            if(StringUtil.IsInvalidPathSegment(Id))
+                throw new NotFoundException();
+
             XmlNode customerXML = service.Delete(service.MerchantPath() + "/customers/" + Id);
 
             return new ResultImpl<Customer>(new NodeWrapper(customerXML), gateway);
@@ -91,6 +94,9 @@ namespace Braintree
 
         public virtual async Task<Result<Customer>> DeleteAsync(string Id)
         {
+            if(StringUtil.IsInvalidPathSegment(Id))
+                throw new NotFoundException();
+
             XmlNode customerXML = await service.DeleteAsync(service.MerchantPath() + "/customers/" + Id).ConfigureAwait(false);
 
             return new ResultImpl<Customer>(new NodeWrapper(customerXML), gateway);
@@ -98,6 +104,9 @@ namespace Braintree
 
         public virtual Result<Customer> Update(string Id, CustomerRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(Id))
+                throw new NotFoundException();
+
             XmlNode customerXML = service.Put(service.MerchantPath() + "/customers/" + Id, request);
 
             return new ResultImpl<Customer>(new NodeWrapper(customerXML), gateway);
@@ -105,6 +114,9 @@ namespace Braintree
 
         public virtual async Task<Result<Customer>> UpdateAsync(string Id, CustomerRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(Id))
+                throw new NotFoundException();
+
             XmlNode customerXML = await service.PutAsync(service.MerchantPath() + "/customers/" + Id, request).ConfigureAwait(false);
 
             return new ResultImpl<Customer>(new NodeWrapper(customerXML), gateway);

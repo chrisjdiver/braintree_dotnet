@@ -41,5 +41,24 @@ namespace Braintree.Tests
           
           Assert.AreEqual(searchRequest.ToXml(),"<search><id><is>1234</is></id><debit-network type=\"array\"><item>NYCE</item><item>ACCEL</item><item>MAESTRO</item><item>NYCE</item><item>PULSE</item><item>STAR</item><item>STAR_ACCESS</item></debit-network></search>");
         }
+
+        [Test]
+        public void Search_ByAchType()
+        {
+            string sameDayXml = new TransactionSearchRequest().
+                AchType.IncludedIn(TransactionAchType.SAME_DAY).
+                ToXml();
+            StringAssert.Contains("<ach-type type=\"array\"><item>same_day</item></ach-type>", sameDayXml);
+
+            string standardXml = new TransactionSearchRequest().
+                AchType.IncludedIn(TransactionAchType.STANDARD).
+                ToXml();
+            StringAssert.Contains("<ach-type type=\"array\"><item>standard</item></ach-type>", standardXml);
+
+            string bothXml = new TransactionSearchRequest().
+                AchType.IncludedIn(TransactionAchType.SAME_DAY, TransactionAchType.STANDARD).
+                ToXml();
+            StringAssert.Contains("<ach-type type=\"array\"><item>same_day</item><item>standard</item></ach-type>", bothXml);
+        }
     }
 }

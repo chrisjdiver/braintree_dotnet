@@ -57,7 +57,7 @@ namespace Braintree
 
         public virtual Plan Find(string id)
         {
-            if(id == null || id.Trim().Equals(""))
+            if(StringUtil.IsInvalidPathSegment(id))
                 throw new NotFoundException();
 
             XmlNode planXML = service.Get(service.MerchantPath() + "/plans/" + id);
@@ -67,7 +67,7 @@ namespace Braintree
 
         public virtual async Task<Plan> FindAsync(string id)
         {
-            if(id == null || id.Trim().Equals(""))
+            if(StringUtil.IsInvalidPathSegment(id))
                 throw new NotFoundException();
 
             XmlNode planXML = await service.GetAsync(service.MerchantPath() + "/plans/" + id).ConfigureAwait(false);
@@ -77,6 +77,9 @@ namespace Braintree
 
         public virtual Result<Plan> Update(string id, PlanRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode planXML = service.Put(service.MerchantPath() + "/plans/" + id, request);
 
             return new ResultImpl<Plan>(new NodeWrapper(planXML), gateway);
@@ -84,6 +87,9 @@ namespace Braintree
 
         public virtual async Task<Result<Plan>> UpdateAsync(string id, PlanRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode planXML = await service.PutAsync(service.MerchantPath() + "/plans/" + id, request).ConfigureAwait(false);
 
             return new ResultImpl<Plan>(new NodeWrapper(planXML), gateway);

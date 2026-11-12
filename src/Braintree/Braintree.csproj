@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Description>Braintree Client Library</Description>
     <Copyright>Copyright © Braintree, a division of PayPal, Inc. 2021</Copyright>
-    <VersionPrefix>5.41.0</VersionPrefix>
+    <VersionPrefix>5.42.0</VersionPrefix>
     <Authors>Braintree</Authors>
     <!-- We target NET standard 2.0 so that we can support NET Core 2.1. When NET Core 2.1 reaches EOL, we can update to Net Standard 2.1 -->
     <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
@@ -12,10 +12,13 @@
     <PackageId>Braintree</PackageId>
     <PackageTags>braintree;paypal;venmo;intenational;payments;gateway;currencies;money;visa;mastercard;bitcoin;maestro;apple pay;android pay;amex;jcb;diners club;discover;american express</PackageTags>
     <PackageReleaseNotes>
-      - Add PreferredPaymentMethodToken to ClientTokenRequest
-      - Deprecate DebugId on PayPalDetails, LocalPaymentDetails, and SepaDirectDebitAccountDetails
-      - Add accountReferenceNumberType to sender and receiver in transfer on Transaction
-      - Add CannotCloneThirdPartyCofNetworkTokenTransaction (915274) transaction validation error code
+      - Add TransactionGateway.Reverse to automatically void or fully refund a transaction
+      - Add PAYPAL_ACCOUNT_EMAIL_FORMAT_IS_INVALID (92963) and PAYPAL_ACCOUNT_EMAIL_IS_TOO_LONG (92964) validation error codes
+      - Add SurchargeAmount to TransactionRefundRequest
+      - Add Network to ThreeDSecurePassThruRequest
+      - Fix path traversal vulnerability in Dispute and Address gateways by validating that IDs used in request paths do not contain path separators or relative-path segments
+      - Fix path traversal vulnerability in CreditCard, CreditCardVerification, Customer, MerchantAccount, PayPalAccount, PaymentMethod, PaymentMethodNonce, Plan, SepaDirectDebitAccount, Subscription, TestTransaction, ThreeDSecure, Transaction, TransactionLineItem, UsBankAccount, and UsBankAccountVerification gateways by validating that IDs used in request paths do not contain path separators or relative-path segments
+      - Add AchType to transaction search
     </PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/braintree/braintree_dotnet</PackageProjectUrl>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
@@ -37,6 +40,7 @@
     <Reference Include="System.Runtime" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="Microsoft.CSharp" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net452' ">

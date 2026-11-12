@@ -1,3 +1,4 @@
+using Braintree.Exceptions;
 using System.Threading.Tasks;
 
 namespace Braintree
@@ -16,6 +17,9 @@ namespace Braintree
 
         public Result<PaymentMethodNonce> Create(string token)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             var response = new NodeWrapper(service.Post(service.MerchantPath() + "/payment_methods/" + token + "/nonces"));
 
             return new ResultImpl<PaymentMethodNonce>(response, gateway);
@@ -23,6 +27,9 @@ namespace Braintree
 
         public async Task<Result<PaymentMethodNonce>> CreateAsync(string token, PaymentMethodNonceRequest request=null)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             var response = new NodeWrapper(await service.PostAsync(service.MerchantPath() + "/payment_methods/" + token + "/nonces", request).ConfigureAwait(false));
 
             return new ResultImpl<PaymentMethodNonce>(response, gateway);
@@ -30,6 +37,9 @@ namespace Braintree
 
         public virtual PaymentMethodNonce Find(string nonce)
         {
+            if(StringUtil.IsInvalidPathSegment(nonce))
+                throw new NotFoundException();
+
             var response = new NodeWrapper(service.Get(service.MerchantPath() + "/payment_method_nonces/" + nonce));
 
             return new PaymentMethodNonce(response, gateway);
@@ -37,6 +47,9 @@ namespace Braintree
 
         public virtual async Task<PaymentMethodNonce> FindAsync(string nonce)
         {
+            if(StringUtil.IsInvalidPathSegment(nonce))
+                throw new NotFoundException();
+
             var response = new NodeWrapper(await service.GetAsync(service.MerchantPath() + "/payment_method_nonces/" + nonce).ConfigureAwait(false));
 
             return new PaymentMethodNonce(response, gateway);

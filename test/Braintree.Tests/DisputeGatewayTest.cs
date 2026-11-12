@@ -540,5 +540,68 @@ namespace Braintree.Tests
             ).GetAwaiter().GetResult();
         }
 #endif
+
+        [Test]
+        public void RemoveEvidence_traversalIdThrowsNotFoundException()
+        {
+            NotFoundException disputeIdException = Assert.Throws<NotFoundException>(() => disputeGateway.RemoveEvidence("../../foo", "evidence"));
+            Assert.AreEqual("evidence with id 'evidence' for dispute with id '../../foo' not found", disputeIdException.Message);
+
+            NotFoundException evidenceIdException = Assert.Throws<NotFoundException>(() => disputeGateway.RemoveEvidence("dispute", "../../foo"));
+            Assert.AreEqual("evidence with id '../../foo' for dispute with id 'dispute' not found", evidenceIdException.Message);
+        }
+
+        [Test]
+#if netcore
+        public async Task RemoveEvidence_traversalIdThrowsNotFoundExceptionAsync()
+#else
+        public void RemoveEvidence_traversalIdThrowsNotFoundExceptionAsync()
+        {
+            Task.Run(async () =>
+#endif
+        {
+            try
+            {
+                await disputeGateway.RemoveEvidenceAsync("../../foo", "evidence");
+                Assert.Fail("Expected NotFoundException.");
+            }
+            catch (NotFoundException exception)
+            {
+                Assert.AreEqual(exception.Message, "evidence with id 'evidence' for dispute with id '../../foo' not found");
+            }
+
+            try
+            {
+                await disputeGateway.RemoveEvidenceAsync("dispute", "../../foo");
+                Assert.Fail("Expected NotFoundException.");
+            }
+            catch (NotFoundException exception)
+            {
+                Assert.AreEqual(exception.Message, "evidence with id '../../foo' for dispute with id 'dispute' not found");
+            }
+        }
+#if net452
+            ).GetAwaiter().GetResult();
+        }
+#endif
+
+        [Test]
+        public void DisputeMethods_traversalDisputeIdThrowsNotFoundException()
+        {
+            NotFoundException acceptException = Assert.Throws<NotFoundException>(() => disputeGateway.Accept("../../foo"));
+            Assert.AreEqual("dispute with id '../../foo' not found", acceptException.Message);
+
+            NotFoundException findException = Assert.Throws<NotFoundException>(() => disputeGateway.Find("../../foo"));
+            Assert.AreEqual("dispute with id '../../foo' not found", findException.Message);
+
+            NotFoundException finalizeException = Assert.Throws<NotFoundException>(() => disputeGateway.Finalize("../../foo"));
+            Assert.AreEqual("dispute with id '../../foo' not found", finalizeException.Message);
+
+            NotFoundException fileEvidenceException = Assert.Throws<NotFoundException>(() => disputeGateway.AddFileEvidence("../../foo", "document"));
+            Assert.AreEqual("dispute with id '../../foo' not found", fileEvidenceException.Message);
+
+            NotFoundException textEvidenceException = Assert.Throws<NotFoundException>(() => disputeGateway.AddTextEvidence("../../foo", "evidence"));
+            Assert.AreEqual("Dispute with ID '../../foo' not found", textEvidenceException.Message);
+        }
     }
 }

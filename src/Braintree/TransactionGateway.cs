@@ -9,7 +9,7 @@ using System.Xml;
 namespace Braintree
 {
     /// <summary>
-    /// Provides operations for sales, credits, refunds, voids, submitting for settlement, and searching for transactions in the vault
+    /// Provides operations for sales, credits, refunds, reversals, voids, submitting for settlement, and searching for transactions in the vault
     /// </summary>
     public class TransactionGateway : ITransactionGateway
     {
@@ -25,6 +25,9 @@ namespace Braintree
 
         public virtual Result<Transaction> AdjustAuthorization(string id, decimal amount)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             var request = new TransactionRequest
             {
                 Amount = amount
@@ -36,6 +39,9 @@ namespace Braintree
 
         public virtual async Task<Result<Transaction>> AdjustAuthorizationAsync(string id, decimal amount)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             var request = new TransactionRequest
             {
                 Amount = amount
@@ -47,6 +53,9 @@ namespace Braintree
 
         public virtual Result<Transaction> CancelRelease(string id)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             var request = new TransactionRequest();
 
             XmlNode response = service.Put(service.MerchantPath() + "/transactions/" + id + "/cancel_release", request);
@@ -56,6 +65,9 @@ namespace Braintree
 
         public virtual async Task<Result<Transaction>> CancelReleaseAsync(string id)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             var request = new TransactionRequest();
 
             XmlNode response = await service.PutAsync(service.MerchantPath() + "/transactions/" + id + "/cancel_release", request).ConfigureAwait(false);
@@ -81,7 +93,7 @@ namespace Braintree
 
         public virtual Transaction Find(string id)
         {
-            if(id == null || id.Trim().Equals(""))
+            if(StringUtil.IsInvalidPathSegment(id))
                 throw new NotFoundException();
 
             XmlNode response = service.Get(service.MerchantPath() + "/transactions/" + id);
@@ -91,7 +103,7 @@ namespace Braintree
 
         public virtual async Task<Transaction> FindAsync(string id)
         {
-            if(id == null || id.Trim().Equals(""))
+            if(StringUtil.IsInvalidPathSegment(id))
                 throw new NotFoundException();
 
             XmlNode response = await service.GetAsync(service.MerchantPath() + "/transactions/" + id).ConfigureAwait(false);
@@ -101,12 +113,18 @@ namespace Braintree
 
         public virtual Result<Transaction> Refund(string id)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode response = service.Post(service.MerchantPath() + "/transactions/" + id + "/refund");
             return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
         }
 
         public virtual async Task<Result<Transaction>> RefundAsync(string id)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode response = await service.PostAsync(service.MerchantPath() + "/transactions/" + id + "/refund").ConfigureAwait(false);
             return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
         }
@@ -133,13 +151,47 @@ namespace Braintree
 
         public virtual Result<Transaction> Refund(string id, TransactionRefundRequest refundRequest)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode response = service.Post(service.MerchantPath() + "/transactions/" + id + "/refund", refundRequest);
             return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
         }
 
         public virtual async Task<Result<Transaction>> RefundAsync(string id, TransactionRefundRequest refundRequest)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode response = await service.PostAsync(service.MerchantPath() + "/transactions/" + id + "/refund", refundRequest).ConfigureAwait(false);
+            return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
+        }
+
+        public virtual Result<Transaction> Reverse(string id)
+        {
+            return Reverse(id, null);
+        }
+
+        public virtual Result<Transaction> Reverse(string id, TransactionReverseRequest request)
+        {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
+            XmlNode response = service.Post(service.MerchantPath() + "/transactions/" + id + "/reverse", request);
+            return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
+        }
+
+        public virtual async Task<Result<Transaction>> ReverseAsync(string id)
+        {
+            return await ReverseAsync(id, null).ConfigureAwait(false);
+        }
+
+        public virtual async Task<Result<Transaction>> ReverseAsync(string id, TransactionReverseRequest request)
+        {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
+            XmlNode response = await service.PostAsync(service.MerchantPath() + "/transactions/" + id + "/reverse", request).ConfigureAwait(false);
             return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
         }
 
@@ -191,6 +243,9 @@ namespace Braintree
 
         public virtual Result<Transaction> SubmitForSettlement(string id, TransactionRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode response = service.Put(service.MerchantPath() + "/transactions/" + id + "/submit_for_settlement", request);
 
             return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
@@ -198,12 +253,18 @@ namespace Braintree
 
         public virtual async Task<Result<Transaction>> SubmitForSettlementAsync(string id, TransactionRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode response = await service.PutAsync(service.MerchantPath() + "/transactions/" + id + "/submit_for_settlement", request).ConfigureAwait(false);
             return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
         }
 
         public virtual Result<Transaction> UpdateDetails(string id, TransactionRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode response = service.Put(service.MerchantPath() + "/transactions/" + id + "/update_details", request);
 
             return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
@@ -211,6 +272,9 @@ namespace Braintree
 
         public virtual Result<Transaction> PackageTracking(string id, PackageTrackingRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode response = service.Post(service.MerchantPath() + "/transactions/" + id + "/shipments", request);
 
             return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
@@ -218,7 +282,10 @@ namespace Braintree
 
         public virtual async Task<Result<Transaction>> PackageTrackingAsync(string id, PackageTrackingRequest request)
         {
-            XmlNode response = await service.PostAsync(service.MerchantPath() + "/transactions/" + id + "/shipments", request).ConfigureAwait(false);;
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
+            XmlNode response = await service.PostAsync(service.MerchantPath() + "/transactions/" + id + "/shipments", request).ConfigureAwait(false);
 
             return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
         }
@@ -233,6 +300,9 @@ namespace Braintree
 
         public virtual Result<Transaction> SubmitForPartialSettlement(string id, TransactionRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode response = service.Post(service.MerchantPath() + "/transactions/" + id + "/submit_for_partial_settlement", request);
 
             return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
@@ -245,6 +315,9 @@ namespace Braintree
 
         public virtual Result<Transaction> Void(string id, TransactionVoidRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode response = service.Put(service.MerchantPath() + "/transactions/" + id + "/void", request);
 
             return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
@@ -257,6 +330,9 @@ namespace Braintree
 
         public virtual async Task<Result<Transaction>> VoidAsync(string id, TransactionVoidRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode response = await service.PutAsync(service.MerchantPath() + "/transactions/" + id + "/void", request).ConfigureAwait(false);
 
             return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
@@ -292,6 +368,9 @@ namespace Braintree
 
         public virtual Result<Transaction> CloneTransaction(string id, TransactionCloneRequest cloneRequest)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode response = service.Post(service.MerchantPath() + "/transactions/" + id + "/clone", cloneRequest);
 
             return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);
@@ -299,6 +378,9 @@ namespace Braintree
 
         public virtual async Task<Result<Transaction>> CloneTransactionAsync(string id, TransactionCloneRequest cloneRequest)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode response = await service.PostAsync(service.MerchantPath() + "/transactions/" + id + "/clone", cloneRequest).ConfigureAwait(false);
 
             return new ResultImpl<Transaction>(new NodeWrapper(response), gateway);

@@ -76,6 +76,38 @@ namespace Braintree.Tests
         {
             Assert.AreEqual("first_name", StringUtil.Underscore("first_name"));
         }
+
+        [Test]
+        public void IsInvalidPathSegment_ReturnsTrueForNullBlankAndTraversal()
+        {
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment(null));
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment(""));
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment("   "));
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment(".."));
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment("../../foo"));
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment("foo/bar"));
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment("foo\\bar"));
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment("foo%2e%2e"));
+            // Characters outside the allowlist that a blocklist of / \ % would miss.
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment("evidence#x"));
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment("evidence?x=1"));
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment("evidence;x"));
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment("evidence x"));
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment("evidence\tx"));
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment("evidence\nx"));
+            // Dots are outside the allowlist, so any dotted segment is rejected.
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment("."));
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment("abc..def"));
+            Assert.IsTrue(StringUtil.IsInvalidPathSegment("file.png"));
+        }
+
+        [Test]
+        public void IsInvalidPathSegment_ReturnsFalseForValidIds()
+        {
+            Assert.IsFalse(StringUtil.IsInvalidPathSegment("abc123"));
+            Assert.IsFalse(StringUtil.IsInvalidPathSegment("customer_id-123"));
+            Assert.IsFalse(StringUtil.IsInvalidPathSegment("ZGlzcHV0ZV9pZA"));
+        }
     }
 }
 

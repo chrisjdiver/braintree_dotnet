@@ -25,7 +25,7 @@ namespace Braintree
 
         public virtual List<TransactionLineItem> FindAll(string id)
         {
-            if (id == null || id.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(id))
                 throw new NotFoundException();
 
             var response = new NodeWrapper(service.Get(service.MerchantPath() + "/transactions/" + id + "/line_items"));

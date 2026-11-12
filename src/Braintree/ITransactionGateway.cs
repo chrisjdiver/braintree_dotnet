@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace Braintree
 {
     /// <summary>
-    /// Provides operations for sales, credits, refunds, voids, submitting for settlement, and searching for transactions in the vault
+    /// Provides operations for sales, credits, refunds, reversals, voids, submitting for settlement, and searching for transactions in the vault
     /// </summary>
     public interface ITransactionGateway
     {
@@ -25,6 +25,10 @@ namespace Braintree
         Task<Result<Transaction>> RefundAsync(string id, decimal amount);
         Result<Transaction> Refund(string id, TransactionRefundRequest refundRequest);
         Task<Result<Transaction>> RefundAsync(string id, TransactionRefundRequest refundRequest);
+        Result<Transaction> Reverse(string id);
+        Result<Transaction> Reverse(string id, TransactionReverseRequest request);
+        Task<Result<Transaction>> ReverseAsync(string id);
+        Task<Result<Transaction>> ReverseAsync(string id, TransactionReverseRequest request);
         Result<Transaction> Sale(TransactionRequest request);
         Task<Result<Transaction>> SaleAsync(TransactionRequest request);
         ResourceCollection<Transaction> Search(TransactionSearchRequest query);

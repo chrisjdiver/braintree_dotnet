@@ -1,0 +1,34 @@
+#pragma warning disable 1591
+
+namespace Braintree
+{
+    public class TransactionReverseRequest : Request
+    {
+        public string ApiRequestKey { get; set; }
+
+        public override string ToXml()
+        {
+            return ToXml("transaction");
+        }
+
+        public override string ToXml(string root)
+        {
+            return BuildRequest(root).ToXml();
+        }
+
+        public override string ToQueryString()
+        {
+            return ToQueryString("transaction");
+        }
+
+        public override string ToQueryString(string root)
+        {
+            return BuildRequest(root).ToQueryString();
+        }
+
+        protected virtual RequestBuilder BuildRequest(string root)
+        {
+            return new RequestBuilder(root).AddElement("api-request-key", ApiRequestKey);
+        }
+    }
+}

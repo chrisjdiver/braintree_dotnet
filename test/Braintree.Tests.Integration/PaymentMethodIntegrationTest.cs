@@ -286,6 +286,73 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
+        public void Create_CreatePaymentMethodWithThreeDSecurePassThruNetwork()
+        {
+            Result<Customer> customerResult = gateway.Customer.Create(new CustomerRequest());
+            Assert.IsTrue(customerResult.IsSuccess());
+
+            var request = new PaymentMethodRequest()
+            {
+                CustomerId = customerResult.Target.Id,
+                PaymentMethodNonce = Nonce.Transactable,
+                ThreeDSecurePassThru = new ThreeDSecurePassThruRequest()
+                {
+                    EciFlag = "05",
+                    Cavv = "some-cavv",
+                    Xid = "some-xid",
+                    ThreeDSecureVersion = "2.2.0",
+                    DsTransactionId = "some-ds-transaction-id",
+                    AuthenticationResponse = "some-auth-response",
+                    DirectoryResponse = "some-directory-response",
+                    CavvAlgorithm = "algorithm",
+                    Network = ThreeDSecurePassThruNetwork.VISA
+                },
+                Options = new PaymentMethodOptionsRequest()
+                {
+                    VerifyCard = true
+                },
+            };
+
+            Result<PaymentMethod> result = gateway.PaymentMethod.Create(request);
+            Assert.IsTrue(result.IsSuccess());
+        }
+
+        [Test]
+        public void Create_CreatePaymentMethodWithThreeDSecurePassThruNetworkThatDoesNotMatchPaymentInstrument()
+        {
+            Result<Customer> customerResult = gateway.Customer.Create(new CustomerRequest());
+            Assert.IsTrue(customerResult.IsSuccess());
+
+            var request = new PaymentMethodRequest()
+            {
+                CustomerId = customerResult.Target.Id,
+                PaymentMethodNonce = Nonce.TransactableMasterCard,
+                ThreeDSecurePassThru = new ThreeDSecurePassThruRequest()
+                {
+                    EciFlag = "05",
+                    Cavv = "some-cavv",
+                    Xid = "some-xid",
+                    ThreeDSecureVersion = "2.2.0",
+                    DsTransactionId = "some-ds-transaction-id",
+                    AuthenticationResponse = "some-auth-response",
+                    DirectoryResponse = "some-directory-response",
+                    CavvAlgorithm = "algorithm",
+                    Network = ThreeDSecurePassThruNetwork.VISA
+                },
+                Options = new PaymentMethodOptionsRequest()
+                {
+                    VerifyCard = true
+                },
+            };
+
+            Result<PaymentMethod> result = gateway.PaymentMethod.Create(request);
+            Assert.IsFalse(result.IsSuccess());
+            Assert.AreEqual(
+                ValidationErrorCode.VERIFICATION_THREE_D_SECURE_NETWORK_DOES_NOT_MATCH_PAYMENT_INSTRUMENT,
+                result.Errors.ForObject("Verification").OnField("Network")[0].Code);
+        }
+
+        [Test]
         public void CreateWithoutSkipAdvancedFraudCheckingIncludesRiskData()
         {
             FraudProtectionEnterpriseSetup();
@@ -1511,6 +1578,45 @@ namespace Braintree.Tests.Integration
                     Number = MASTERCARD,
                     ExpirationDate = "06/2013",
                     ThreeDSecurePassThru = passThruRequestWithThreeDSecureVersion,
+                    Options = new PaymentMethodOptionsRequest()
+                    {
+                        VerifyCard = true
+                    },
+                });
+
+            Assert.IsTrue(updateResult.IsSuccess());
+        }
+
+        [Test]
+        public void Update_UpdatePaymentMethodWithThreeDSecurePassThruNetwork()
+        {
+            var customer = gateway.Customer.Create().Target;
+            var creditCard = gateway.CreditCard.Create(new CreditCardRequest
+            {
+                CardholderName = "John Doe",
+                CustomerId = customer.Id,
+                CVV = "123",
+                Number = "5105105105105100",
+                ExpirationDate = "05/12"
+            }).Target;
+
+            var updateResult = gateway.PaymentMethod.Update(
+                creditCard.Token,
+                new PaymentMethodRequest()
+                {
+                    PaymentMethodNonce = Nonce.TransactableVisa,
+                    ThreeDSecurePassThru = new ThreeDSecurePassThruRequest()
+                    {
+                        EciFlag = "05",
+                        Cavv = "some-cavv",
+                        Xid = "some-xid",
+                        ThreeDSecureVersion = "2.2.0",
+                        DsTransactionId = "some-ds-transaction-id",
+                        AuthenticationResponse = "some-auth-response",
+                        DirectoryResponse = "some-directory-response",
+                        CavvAlgorithm = "algorithm",
+                        Network = ThreeDSecurePassThruNetwork.VISA
+                    },
                     Options = new PaymentMethodOptionsRequest()
                     {
                         VerifyCard = true

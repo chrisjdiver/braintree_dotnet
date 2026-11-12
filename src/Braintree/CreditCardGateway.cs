@@ -101,7 +101,7 @@ namespace Braintree
 
         public virtual CreditCard Find(string token)
         {
-            if(token == null || token.Trim().Equals(""))
+            if(StringUtil.IsInvalidPathSegment(token))
                 throw new NotFoundException();
 
             XmlNode creditCardXML = service.Get(service.MerchantPath() + "/payment_methods/credit_card/" + token);
@@ -111,7 +111,7 @@ namespace Braintree
 
         public virtual async Task<CreditCard> FindAsync(string token)
         {
-            if(token == null || token.Trim().Equals(""))
+            if(StringUtil.IsInvalidPathSegment(token))
                 throw new NotFoundException();
 
             XmlNode creditCardXML = await service.GetAsync(service.MerchantPath() + "/payment_methods/credit_card/" + token).ConfigureAwait(false);
@@ -121,7 +121,7 @@ namespace Braintree
 
         public virtual CreditCard FromNonce(string nonce)
         {
-            if (nonce == null || nonce.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(nonce))
                 throw new NotFoundException();
 
             try
@@ -137,7 +137,7 @@ namespace Braintree
 
         public virtual async Task<CreditCard> FromNonceAsync(string nonce)
         {
-            if (nonce == null || nonce.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(nonce))
                 throw new NotFoundException();
 
             try
@@ -153,16 +153,25 @@ namespace Braintree
 
         public virtual void Delete(string token)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             service.Delete(service.MerchantPath() + "/payment_methods/credit_card/" + token);
         }
 
         public virtual Task DeleteAsync(string token)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             return service.DeleteAsync(service.MerchantPath() + "/payment_methods/credit_card/" + token);
         }
 
         public virtual Result<CreditCard> Update(string token, CreditCardRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             XmlNode creditCardXML = service.Put(service.MerchantPath() + "/payment_methods/credit_card/" + token, request);
 
             return new ResultImpl<CreditCard>(new NodeWrapper(creditCardXML), gateway);
@@ -170,6 +179,9 @@ namespace Braintree
 
         public virtual async Task<Result<CreditCard>> UpdateAsync(string token, CreditCardRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             XmlNode creditCardXML = await service.PutAsync(service.MerchantPath() + "/payment_methods/credit_card/" + token, request).ConfigureAwait(false);
 
             return new ResultImpl<CreditCard>(new NodeWrapper(creditCardXML), gateway);

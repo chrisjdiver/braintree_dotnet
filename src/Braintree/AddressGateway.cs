@@ -23,6 +23,11 @@ namespace Braintree
 
         public virtual Result<Address> Create(string customerId, AddressRequest request)
         {
+            if (StringUtil.IsInvalidPathSegment(customerId))
+            {
+                throw new NotFoundException();
+            }
+
             XmlNode addressXML = Service.Post(Service.MerchantPath() + "/customers/" + customerId + "/addresses", request);
 
             return new ResultImpl<Address>(new NodeWrapper(addressXML), Gateway);
@@ -30,6 +35,11 @@ namespace Braintree
 
         public virtual async Task<Result<Address>> CreateAsync(string customerId, AddressRequest request)
         {
+            if (StringUtil.IsInvalidPathSegment(customerId))
+            {
+                throw new NotFoundException();
+            }
+
             XmlNode addressXML = await Service.PostAsync(Service.MerchantPath() + "/customers/" + customerId + "/addresses", request).ConfigureAwait(false);
 
             return new ResultImpl<Address>(new NodeWrapper(addressXML), Gateway);
@@ -37,6 +47,11 @@ namespace Braintree
 
         public virtual Result<Address> Delete(string customerId, string id)
         {
+            if (StringUtil.IsInvalidPathSegment(customerId) || StringUtil.IsInvalidPathSegment(id))
+            {
+                throw new NotFoundException();
+            }
+
             XmlNode addressXML = Service.Delete(Service.MerchantPath() + "/customers/" + customerId + "/addresses/" + id);
 
             return new ResultImpl<Address>(new NodeWrapper(addressXML), Gateway);
@@ -44,6 +59,11 @@ namespace Braintree
 
         public virtual async Task<Result<Address>> DeleteAsync(string customerId, string id)
         {
+            if (StringUtil.IsInvalidPathSegment(customerId) || StringUtil.IsInvalidPathSegment(id))
+            {
+                throw new NotFoundException();
+            }
+
             XmlNode addressXML = await Service.DeleteAsync(Service.MerchantPath() + "/customers/" + customerId + "/addresses/" + id).ConfigureAwait(false);
 
             return new ResultImpl<Address>(new NodeWrapper(addressXML), Gateway);
@@ -51,7 +71,7 @@ namespace Braintree
 
         public virtual Address Find(string customerId, string id)
         {
-            if(customerId == null || customerId.Trim().Equals("") || id == null || id.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(customerId) || StringUtil.IsInvalidPathSegment(id))
             {
                 throw new NotFoundException();
             }
@@ -63,7 +83,7 @@ namespace Braintree
 
         public virtual async Task<Address> FindAsync(string customerId, string id)
         {
-            if(customerId == null || customerId.Trim().Equals("") || id == null || id.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(customerId) || StringUtil.IsInvalidPathSegment(id))
             {
                 throw new NotFoundException();
             }
@@ -76,6 +96,11 @@ namespace Braintree
 
         public virtual Result<Address> Update(string customerId, string id, AddressRequest request)
         {
+            if (StringUtil.IsInvalidPathSegment(customerId) || StringUtil.IsInvalidPathSegment(id))
+            {
+                throw new NotFoundException();
+            }
+
             XmlNode addressXML = Service.Put(Service.MerchantPath() + "/customers/" + customerId + "/addresses/" + id, request);
 
             return new ResultImpl<Address>(new NodeWrapper(addressXML), Gateway);
@@ -83,6 +108,11 @@ namespace Braintree
 
         public virtual async Task<Result<Address>> UpdateAsync(string customerId, string id, AddressRequest request)
         {
+            if (StringUtil.IsInvalidPathSegment(customerId) || StringUtil.IsInvalidPathSegment(id))
+            {
+                throw new NotFoundException();
+            }
+
             XmlNode addressXML = await Service.PutAsync(Service.MerchantPath() + "/customers/" + customerId + "/addresses/" + id, request).ConfigureAwait(false);
 
             return new ResultImpl<Address>(new NodeWrapper(addressXML), Gateway);

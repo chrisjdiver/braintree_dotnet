@@ -9,6 +9,7 @@ using System.Web;
 using System.Reflection;
 using System.Text;
 using System.Xml;
+using Braintree.Exceptions;
 
 namespace Braintree
 {
@@ -26,9 +27,14 @@ namespace Braintree
 
         public ThreeDSecureLookupResponse Lookup(ThreeDSecureLookupRequest lookupRequest)
         {
+            var nonce = lookupRequest.Nonce;
+            if (StringUtil.IsInvalidPathSegment(nonce))
+            {
+                throw new NotFoundException();
+            }
+
             var config = gateway.Configuration;
             var gwURL = config.Environment.GatewayURL;
-            var nonce = lookupRequest.Nonce;
             var lookupURL = gwURL + "/merchants/" + config.MerchantId + "/client_api/v1/payment_methods/" + nonce + "/three_d_secure/lookup";
             var request = service.GetHttpRequest(lookupURL, "POST");
             var bodyBytes = encoding.GetBytes(lookupRequest.ToJSON());

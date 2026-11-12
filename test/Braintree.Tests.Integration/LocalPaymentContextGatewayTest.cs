@@ -13,7 +13,6 @@ using System.Net.Http;
 namespace Braintree.Tests.Integration
 {
     [TestFixture]
-    [Ignore("unpend when we have a more stable CI")]
     public class LocalPaymentContextGatewayTest
     {
         private BraintreeGateway gateway;
@@ -31,7 +30,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("LocalPaymentContext tests pending")]
         public void Create_CreatesLocalPaymentContext()
         {
             var billingAddress = BillingAddressInput.Builder()
@@ -94,7 +92,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("LocalPaymentContext tests pending")]
         public void Create_WithOnlyRequiredFields()
         {
             var payerInfo = PayerInfoInput.Builder()
@@ -128,7 +125,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("LocalPaymentContext tests pending")]
 #if netcore
         public async Task CreateAsync_CreatesLocalPaymentContext()
 #else
@@ -189,7 +185,6 @@ namespace Braintree.Tests.Integration
 #endif
 
         [Test]
-        [Ignore("LocalPaymentContext tests pending")]
         public void Create_WithMBWAY()
         {
             var billingAddress = BillingAddressInput.Builder()
@@ -225,7 +220,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("LocalPaymentContext tests pending")]
         public void Create_WithCrypto()
         {
             var payerInfo = PayerInfoInput.Builder()
@@ -251,7 +245,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("LocalPaymentContext tests pending")]
         public void Find_FindsLocalPaymentContext()
         {
             var billingAddress = BillingAddressInput.Builder()
@@ -295,7 +288,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("LocalPaymentContext tests pending")]
 #if netcore
         public async Task FindAsync_FindsLocalPaymentContext()
 #else

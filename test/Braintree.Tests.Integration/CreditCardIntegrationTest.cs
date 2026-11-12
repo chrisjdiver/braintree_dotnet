@@ -1592,6 +1592,69 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
+        public void CreateCreditCardWithThreeDSecurePassThruNetwork()
+        {
+            Customer customer = gateway.Customer.Create(new CustomerRequest()).Target;
+            CreditCardRequest request = new CreditCardRequest
+            {
+                CustomerId = customer.Id,
+                Number = SandboxValues.CreditCardNumber.VISA,
+                ExpirationDate = "05/22",
+                ThreeDSecurePassThru = new ThreeDSecurePassThruRequest()
+                {
+                    EciFlag = "05",
+                    Cavv = "some_cavv",
+                    Xid = "some_xid",
+                    AuthenticationResponse = "Y",
+                    DirectoryResponse = "Y",
+                    CavvAlgorithm = "2",
+                    Network = ThreeDSecurePassThruNetwork.VISA,
+                    ThreeDSecureVersion = "2.2.0"
+                },
+                Options = new CreditCardOptionsRequest()
+                {
+                    VerifyCard = true
+                },
+            };
+
+            Result<CreditCard> result = gateway.CreditCard.Create(request);
+            Assert.IsTrue(result.IsSuccess());
+        }
+
+        [Test]
+        public void CreateCreditCardWithThreeDSecurePassThruNetworkThatDoesNotMatchPaymentInstrument()
+        {
+            Customer customer = gateway.Customer.Create(new CustomerRequest()).Target;
+            CreditCardRequest request = new CreditCardRequest
+            {
+                CustomerId = customer.Id,
+                Number = SandboxValues.CreditCardNumber.VISA,
+                ExpirationDate = "05/22",
+                ThreeDSecurePassThru = new ThreeDSecurePassThruRequest()
+                {
+                    EciFlag = "05",
+                    Cavv = "some_cavv",
+                    Xid = "some_xid",
+                    AuthenticationResponse = "Y",
+                    DirectoryResponse = "Y",
+                    CavvAlgorithm = "2",
+                    Network = ThreeDSecurePassThruNetwork.MASTER_CARD,
+                    ThreeDSecureVersion = "2.2.0"
+                },
+                Options = new CreditCardOptionsRequest()
+                {
+                    VerifyCard = true
+                },
+            };
+
+            Result<CreditCard> result = gateway.CreditCard.Create(request);
+            Assert.IsFalse(result.IsSuccess());
+            Assert.AreEqual(
+                ValidationErrorCode.VERIFICATION_THREE_D_SECURE_NETWORK_DOES_NOT_MATCH_PAYMENT_INSTRUMENT,
+                result.Errors.ForObject("Verification").OnField("Network")[0].Code);
+        }
+
+        [Test]
         public void Create_WithAccountTypeCredit()
         {
             Customer customer = gateway.Customer.Create(new CustomerRequest()).Target;

@@ -8,6 +8,7 @@ namespace Braintree
         public string ApiRequestKey { get; set; }
         public string MerchantAccountId { get; set; }
         public string OrderId { get; set; }
+        public decimal? SurchargeAmount { get; set; }
 
         public override string ToXml()
         {
@@ -39,6 +40,7 @@ namespace Braintree
             builder.AddElement("api-request-key", ApiRequestKey);
             builder.AddElement("merchant-account-id", MerchantAccountId);
             builder.AddElement("order-id", OrderId);
+            builder.AddElement("surcharge-amount", SurchargeAmount);
 
             return builder;
         }

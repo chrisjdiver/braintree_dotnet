@@ -78,6 +78,13 @@ namespace Braintree
         [Description("unrecognized")] UNRECOGNIZED
     }
 
+    public enum TransactionAchType
+    {
+        [Description("same_day")] SAME_DAY,
+        [Description("standard")] STANDARD,
+        [Description("unrecognized")] UNRECOGNIZED
+    }
+
     public enum PaymentInstrumentType
     {
         [Description("amex_express_checkout_card")] AMEX_EXPRESS_CHECKOUT_CARD,

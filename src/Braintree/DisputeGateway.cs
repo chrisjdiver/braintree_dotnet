@@ -46,7 +46,7 @@ namespace Braintree
         {
             NotFoundException notFoundException = new NotFoundException($"dispute with id '{disputeId}' not found");
 
-            if (disputeId == null || disputeId.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(disputeId))
             {
                 throw notFoundException;
             }
@@ -64,7 +64,7 @@ namespace Braintree
         {
             NotFoundException notFoundException = new NotFoundException($"dispute with id '{disputeId}' not found");
 
-            if (disputeId == null || disputeId.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(disputeId))
             {
                 throw notFoundException;
             }
@@ -82,7 +82,7 @@ namespace Braintree
         {
             NotFoundException notFoundException = new NotFoundException($"dispute with id '{disputeId}' not found");
 
-            if (disputeId == null || disputeId.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(disputeId))
             {
                 throw notFoundException;
             }
@@ -110,7 +110,7 @@ namespace Braintree
         {
             NotFoundException notFoundException = new NotFoundException($"dispute with id '{disputeId}' not found");
 
-            if (disputeId == null || disputeId.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(disputeId))
             {
                 throw notFoundException;
             }
@@ -147,7 +147,7 @@ namespace Braintree
         {
             NotFoundException notFoundException = new NotFoundException($"Dispute with ID '{disputeId}' not found");
 
-            if (disputeId == null || disputeId.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(disputeId))
             {
                 throw notFoundException;
             }
@@ -184,7 +184,7 @@ namespace Braintree
         {
             NotFoundException notFoundException = new NotFoundException($"Dispute with ID '{disputeId}' not found");
 
-            if (disputeId == null || disputeId.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(disputeId))
             {
                 throw notFoundException;
             }
@@ -212,7 +212,7 @@ namespace Braintree
         {
             NotFoundException notFoundException = new NotFoundException($"dispute with id '{disputeId}' not found");
 
-            if (disputeId == null || disputeId.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(disputeId))
             {
                 throw notFoundException;
             }
@@ -229,7 +229,7 @@ namespace Braintree
         public virtual async Task<Result<Dispute>> FinalizeAsync(string disputeId)
         {
             NotFoundException notFoundException = new NotFoundException($"dispute with id '{disputeId}' not found");
-            if (disputeId == null || disputeId.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(disputeId))
             {
                 throw notFoundException;
             }
@@ -247,7 +247,7 @@ namespace Braintree
         {
             NotFoundException notFoundException = new NotFoundException($"dispute with id '{disputeId}' not found");
 
-            if (disputeId == null || disputeId.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(disputeId))
             {
                 throw notFoundException;
             }
@@ -264,7 +264,7 @@ namespace Braintree
         public virtual async Task<Result<Dispute>> FindAsync(string disputeId)
         {
             NotFoundException notFoundException = new NotFoundException($"dispute with id '{disputeId}' not found");
-            if (disputeId == null || disputeId.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(disputeId))
             {
                 throw notFoundException;
             }
@@ -283,7 +283,7 @@ namespace Braintree
             NotFoundException notFoundException = new NotFoundException(
                 $"evidence with id '{evidenceId}' for dispute with id '{disputeId}' not found");
 
-            if (disputeId == null || disputeId.Trim().Equals("") || evidenceId == null || evidenceId.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(disputeId) || StringUtil.IsInvalidPathSegment(evidenceId))
             {
                 throw notFoundException;
             }
@@ -302,7 +302,7 @@ namespace Braintree
             NotFoundException notFoundException = new NotFoundException(
                 $"evidence with id '{evidenceId}' for dispute with id '{disputeId}' not found");
 
-            if (disputeId == null || disputeId.Trim().Equals("") || evidenceId == null || evidenceId.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(disputeId) || StringUtil.IsInvalidPathSegment(evidenceId))
             {
                 throw notFoundException; 
             }

@@ -7,7 +7,9 @@ namespace Braintree
     public class TransactionSearchRequest : SearchRequest
     {
         public static string ACH_ANY_REASON_CODE = "any_reason_code";
-        
+
+        public EnumMultipleValueNode<TransactionSearchRequest, TransactionAchType> AchType => new EnumMultipleValueNode<TransactionSearchRequest, TransactionAchType>("ach-type", this);
+
         public TextNode<TransactionSearchRequest> AcquirerReferenceNumber => new TextNode<TransactionSearchRequest>("acquirer-reference-number", this);
 
         public RangeNode<TransactionSearchRequest> Amount => new RangeNode<TransactionSearchRequest>("amount", this);

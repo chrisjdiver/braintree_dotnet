@@ -1,3 +1,4 @@
+using Braintree.Exceptions;
 using System.Xml;
 
 namespace Braintree
@@ -16,6 +17,9 @@ namespace Braintree
 
         public SepaDirectDebitAccount Find(string token)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             XmlNode xml = service.Get(service.MerchantPath() + "/payment_methods/sepa_debit_account/" + token);
 
             return new SepaDirectDebitAccount(new NodeWrapper(xml), gateway);
@@ -23,6 +27,9 @@ namespace Braintree
 
         public void Delete(string token)
         {
+            if(StringUtil.IsInvalidPathSegment(token))
+                throw new NotFoundException();
+
             service.Delete(service.MerchantPath() + "/payment_methods/sepa_debit_account/" + token);
         }
     }

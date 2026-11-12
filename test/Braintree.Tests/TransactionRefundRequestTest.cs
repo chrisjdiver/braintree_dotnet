@@ -64,12 +64,34 @@ namespace Braintree.Tests
             request.ApiRequestKey = "refund-key-789";
             request.OrderId = "order-abc";
             request.MerchantAccountId = "merchant-xyz";
+            request.SurchargeAmount = 3.50M;
 
             string xml = request.ToXml();
             Assert.IsTrue(xml.Contains("<amount>25.50</amount>"));
             Assert.IsTrue(xml.Contains("<api-request-key>refund-key-789</api-request-key>"));
             Assert.IsTrue(xml.Contains("<order-id>order-abc</order-id>"));
             Assert.IsTrue(xml.Contains("<merchant-account-id>merchant-xyz</merchant-account-id>"));
+            Assert.IsTrue(xml.Contains("<surcharge-amount>3.50</surcharge-amount>"));
+        }
+
+        [Test]
+        public void ToXml_IncludesSurchargeAmount()
+        {
+            TransactionRefundRequest request = new TransactionRefundRequest();
+            request.SurchargeAmount = 2.75M;
+
+            string xml = request.ToXml();
+            Assert.IsTrue(xml.Contains("<surcharge-amount>2.75</surcharge-amount>"));
+        }
+
+        [Test]
+        public void ToXml_ExcludesSurchargeAmountWhenNull()
+        {
+            TransactionRefundRequest request = new TransactionRefundRequest();
+            request.SurchargeAmount = null;
+
+            string xml = request.ToXml();
+            Assert.IsFalse(xml.Contains("surcharge-amount"));
         }
     }
 }

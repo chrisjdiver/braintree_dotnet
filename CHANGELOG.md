@@ -1,5 +1,14 @@
 # Changelog
 
+## 5.42.0
+- Add `TransactionGateway.Reverse` to automatically void or fully refund a transaction
+- Add `PAYPAL_ACCOUNT_EMAIL_FORMAT_IS_INVALID (92963)` and `PAYPAL_ACCOUNT_EMAIL_IS_TOO_LONG (92964)` validation error codes
+- Add `SurchargeAmount` to `TransactionRefundRequest`
+- Add `Network` to `ThreeDSecurePassThruRequest`
+- Fix path traversal vulnerability in `Dispute` and `Address` gateways by validating that IDs used in request paths do not contain path separators or relative-path segments
+- Fix path traversal vulnerability in `CreditCard`, `CreditCardVerification`, `Customer`, `MerchantAccount`, `PayPalAccount`, `PaymentMethod`, `PaymentMethodNonce`, `Plan`, `SepaDirectDebitAccount`, `Subscription`, `TestTransaction`, `ThreeDSecure`, `Transaction`, `TransactionLineItem`, `UsBankAccount`, and `UsBankAccountVerification` gateways by validating that IDs used in request paths do not contain path separators or relative-path segments
+- Add `AchType` to transaction search
+
 ## 5.41.0
 - Add `PreferredPaymentMethodToken` to `ClientTokenRequest`
 - Deprecate `DebugId` on `PayPalDetails`, `LocalPaymentDetails`, and `SepaDirectDebitAccountDetails`

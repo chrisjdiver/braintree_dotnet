@@ -33,7 +33,7 @@ namespace Braintree
 
         public virtual MerchantAccount Find(string id)
         {
-            if (id == null || id.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(id))
             {
                 throw new NotFoundException();
             }
@@ -45,7 +45,7 @@ namespace Braintree
 
         public virtual async Task<MerchantAccount> FindAsync(string id)
         {
-            if (id == null || id.Trim().Equals(""))
+            if (StringUtil.IsInvalidPathSegment(id))
             {
                 throw new NotFoundException();
             }

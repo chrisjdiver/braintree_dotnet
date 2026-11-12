@@ -754,6 +754,73 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
+        public void Create_CreateCustomerWithThreeDSecurePassThruNetwork()
+        {
+            var createRequest = new CustomerRequest()
+            {
+                FirstName = "Fred",
+                CreditCard = new CreditCardRequest()
+                {
+                    PaymentMethodNonce = Nonce.TransactableVisa,
+                    ThreeDSecurePassThru = new ThreeDSecurePassThruRequest()
+                    {
+                        EciFlag = "05",
+                        Cavv = "some-cavv",
+                        Xid = "some-xid",
+                        ThreeDSecureVersion = "2.2.0",
+                        DsTransactionId = "some-ds-transaction-id",
+                        AuthenticationResponse = "some-auth-response",
+                        DirectoryResponse = "some-directory-response",
+                        CavvAlgorithm = "algorithm",
+                        Network = ThreeDSecurePassThruNetwork.VISA
+                    },
+                    Options = new CreditCardOptionsRequest()
+                    {
+                        VerifyCard = true
+                    }
+                }
+            };
+
+            Result<Customer> result = gateway.Customer.Create(createRequest);
+            Assert.IsTrue(result.IsSuccess());
+        }
+
+        [Test]
+        public void Create_CreateCustomerWithThreeDSecurePassThruNetworkThatDoesNotMatchPaymentInstrument()
+        {
+            var createRequest = new CustomerRequest()
+            {
+                FirstName = "Fred",
+                CreditCard = new CreditCardRequest()
+                {
+                    PaymentMethodNonce = Nonce.TransactableVisa,
+                    ThreeDSecurePassThru = new ThreeDSecurePassThruRequest()
+                    {
+                        EciFlag = "05",
+                        Cavv = "some-cavv",
+                        Xid = "some-xid",
+                        ThreeDSecureVersion = "2.2.0",
+                        DsTransactionId = "some-ds-transaction-id",
+                        AuthenticationResponse = "some-auth-response",
+                        DirectoryResponse = "some-directory-response",
+                        CavvAlgorithm = "algorithm",
+                        Network = ThreeDSecurePassThruNetwork.MASTER_CARD
+                    },
+                    Options = new CreditCardOptionsRequest()
+                    {
+                        VerifyCard = true
+                    }
+                }
+            };
+
+            Result<Customer> result = gateway.Customer.Create(createRequest);
+            Assert.IsFalse(result.IsSuccess());
+            Assert.AreEqual(
+                ValidationErrorCode.VERIFICATION_THREE_D_SECURE_NETWORK_DOES_NOT_MATCH_PAYMENT_INSTRUMENT,
+                result.Errors.ForObject("Verification").OnField("Network")[0].Code);
+        }
+
+        [Test]
         public void Create_CreateCustomerWithCreditCard()
         {
             var createRequest = new CustomerRequest()
@@ -1543,6 +1610,97 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
+        public void Update_UpdateCustomerWithThreeDSecurePassThruNetwork()
+        {
+            var createRequest = new CustomerRequest()
+            {
+                FirstName = "Fred",
+                CreditCard = new CreditCardRequest()
+                {
+                    PaymentMethodNonce = Nonce.TransactableVisa,
+                }
+            };
+            Customer customer = gateway.Customer.Create(createRequest).Target;
+
+            var updateRequest = new CustomerRequest()
+            {
+                FirstName = "Jane",
+                LastName = "Doe",
+                CreditCard = new CreditCardRequest()
+                {
+                    PaymentMethodNonce = Nonce.TransactableVisa,
+                    ThreeDSecurePassThru = new ThreeDSecurePassThruRequest()
+                    {
+                        EciFlag = "05",
+                        Cavv = "some-cavv",
+                        Xid = "some-xid",
+                        ThreeDSecureVersion = "2.2.0",
+                        DsTransactionId = "some-ds-transaction-id",
+                        AuthenticationResponse = "some-auth-response",
+                        DirectoryResponse = "some-directory-response",
+                        CavvAlgorithm = "algorithm",
+                        Network = ThreeDSecurePassThruNetwork.VISA
+                    },
+                    Options = new CreditCardOptionsRequest()
+                    {
+                        VerifyCard = true
+                    }
+                }
+            };
+
+            Result<Customer> result = gateway.Customer.Update(customer.Id, updateRequest);
+            Assert.IsTrue(result.IsSuccess());
+            Assert.AreEqual("Jane", result.Target.FirstName);
+            Assert.AreEqual("Doe", result.Target.LastName);
+        }
+
+        [Test]
+        public void Update_UpdateCustomerWithThreeDSecurePassThruNetworkThatDoesNotMatchPaymentInstrument()
+        {
+            var createRequest = new CustomerRequest()
+            {
+                FirstName = "Fred",
+                CreditCard = new CreditCardRequest()
+                {
+                    PaymentMethodNonce = Nonce.TransactableVisa,
+                }
+            };
+            Customer customer = gateway.Customer.Create(createRequest).Target;
+
+            var updateRequest = new CustomerRequest()
+            {
+                FirstName = "Jane",
+                LastName = "Doe",
+                CreditCard = new CreditCardRequest()
+                {
+                    PaymentMethodNonce = Nonce.TransactableVisa,
+                    ThreeDSecurePassThru = new ThreeDSecurePassThruRequest()
+                    {
+                        EciFlag = "05",
+                        Cavv = "some-cavv",
+                        Xid = "some-xid",
+                        ThreeDSecureVersion = "2.2.0",
+                        DsTransactionId = "some-ds-transaction-id",
+                        AuthenticationResponse = "some-auth-response",
+                        DirectoryResponse = "some-directory-response",
+                        CavvAlgorithm = "algorithm",
+                        Network = ThreeDSecurePassThruNetwork.MASTER_CARD
+                    },
+                    Options = new CreditCardOptionsRequest()
+                    {
+                        VerifyCard = true
+                    }
+                }
+            };
+
+            Result<Customer> result = gateway.Customer.Update(customer.Id, updateRequest);
+            Assert.IsFalse(result.IsSuccess());
+            Assert.AreEqual(
+                ValidationErrorCode.VERIFICATION_THREE_D_SECURE_NETWORK_DOES_NOT_MATCH_PAYMENT_INSTRUMENT,
+                result.Errors.ForObject("Verification").OnField("Network")[0].Code);
+        }
+
+        [Test]
         public void UpdateWithoutSkipAdvancedFraudCheckingIncludesRiskData()
         {
             FraudProtectionEnterpriseSetup();
@@ -1777,7 +1935,6 @@ namespace Braintree.Tests.Integration
 #endif
 
         [Test]
-        [Ignore("unpend when we have a more stable CI")]
         public void All() {
             ResourceCollection<Customer> collection = gateway.Customer.All();
 
@@ -1820,7 +1977,6 @@ namespace Braintree.Tests.Integration
 #endif
 
         [Test]
-        [Ignore("unpend when we have a more stable CI")]
         public void Search_FindDuplicateCardsGivenPaymentMethodToken()
         {
             CreditCardRequest creditCard = new CreditCardRequest

@@ -40,7 +40,7 @@ namespace Braintree
 
         public virtual Subscription Find(string id)
         {
-            if(id == null || id.Trim().Equals(""))
+            if(StringUtil.IsInvalidPathSegment(id))
                 throw new NotFoundException();
 
             XmlNode subscriptionXML = service.Get(service.MerchantPath() + "/subscriptions/" + id);
@@ -50,7 +50,7 @@ namespace Braintree
 
         public virtual async Task<Subscription> FindAsync(string id)
         {
-            if(id == null || id.Trim().Equals(""))
+            if(StringUtil.IsInvalidPathSegment(id))
                 throw new NotFoundException();
 
             XmlNode subscriptionXML = await service.GetAsync(service.MerchantPath() + "/subscriptions/" + id).ConfigureAwait(false);
@@ -60,6 +60,9 @@ namespace Braintree
 
         public virtual Result<Subscription> Update(string id, SubscriptionRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode subscriptionXML = service.Put(service.MerchantPath() + "/subscriptions/" + id, request);
 
             return new ResultImpl<Subscription>(new NodeWrapper(subscriptionXML), gateway);
@@ -67,6 +70,9 @@ namespace Braintree
 
         public virtual async Task<Result<Subscription>> UpdateAsync(string id, SubscriptionRequest request)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode subscriptionXML = await service.PutAsync(service.MerchantPath() + "/subscriptions/" + id, request).ConfigureAwait(false);
 
             return new ResultImpl<Subscription>(new NodeWrapper(subscriptionXML), gateway);
@@ -74,6 +80,9 @@ namespace Braintree
 
         public virtual Result<Subscription> Cancel(string id)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode subscriptionXML = service.Put(service.MerchantPath() + "/subscriptions/" + id + "/cancel");
 
             return new ResultImpl<Subscription>(new NodeWrapper(subscriptionXML), gateway);
@@ -81,6 +90,9 @@ namespace Braintree
 
         public virtual async Task<Result<Subscription>> CancelAsync(string id)
         {
+            if(StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             XmlNode subscriptionXML = await service.PutAsync(service.MerchantPath() + "/subscriptions/" + id + "/cancel").ConfigureAwait(false);
 
             return new ResultImpl<Subscription>(new NodeWrapper(subscriptionXML), gateway);

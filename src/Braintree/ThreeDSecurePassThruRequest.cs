@@ -12,6 +12,7 @@ namespace Braintree
         public string CavvAlgorithm { get; set; }
         public string DsTransactionId { get; set; }
         public string ThreeDSecureVersion { get; set; }
+        public ThreeDSecurePassThruNetwork? Network { get; set; }
 
         public override string ToXml(string root)
         {
@@ -33,7 +34,8 @@ namespace Braintree
                 AddElement("authentication_response", AuthenticationResponse).
                 AddElement("directory_response", DirectoryResponse).
                 AddElement("cavv_algorithm", CavvAlgorithm).
-                AddElement("ds_transaction_id", DsTransactionId);
+                AddElement("ds_transaction_id", DsTransactionId).
+                AddElement("network", Network?.GetDescription());
         }
     }
 }

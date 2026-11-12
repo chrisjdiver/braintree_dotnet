@@ -1,5 +1,6 @@
 #pragma warning disable 1591
 
+using Braintree.Exceptions;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -30,6 +31,9 @@ namespace Braintree
 
         public virtual Transaction Settle(string id)
         {
+            if (StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             CheckEnvironment();
             XmlNode response = service.Put(service.MerchantPath() + "/transactions/" + id + "/settle");
             return new Transaction(new NodeWrapper(response), gateway);
@@ -37,6 +41,9 @@ namespace Braintree
 
         public virtual async Task<Transaction> SettleAsync(string id)
         {
+            if (StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             CheckEnvironment();
             XmlNode response = await service.PutAsync(service.MerchantPath() + "/transactions/" + id + "/settle").ConfigureAwait(false);
             return new Transaction(new NodeWrapper(response), gateway);
@@ -44,6 +51,9 @@ namespace Braintree
 
         public virtual Transaction SettlementConfirm(string id)
         {
+            if (StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             CheckEnvironment();
             XmlNode response = service.Put(service.MerchantPath() + "/transactions/" + id + "/settlement_confirm");
             return new Transaction(new NodeWrapper(response), gateway);
@@ -51,6 +61,9 @@ namespace Braintree
 
         public virtual async Task<Transaction> SettlementConfirmAsync(string id)
         {
+            if (StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             CheckEnvironment();
             XmlNode response = await service.PutAsync(service.MerchantPath() + "/transactions/" + id + "/settlement_confirm").ConfigureAwait(false);
             return new Transaction(new NodeWrapper(response), gateway);
@@ -58,6 +71,9 @@ namespace Braintree
 
         public virtual Transaction SettlementPending(string id)
         {
+            if (StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             CheckEnvironment();
             XmlNode response = service.Put(service.MerchantPath() + "/transactions/" + id + "/settlement_pending");
             return new Transaction(new NodeWrapper(response), gateway);
@@ -65,6 +81,9 @@ namespace Braintree
 
         public virtual Transaction SettlementDecline(string id)
         {
+            if (StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             CheckEnvironment();
             XmlNode response = service.Put(service.MerchantPath() + "/transactions/" + id + "/settlement_decline");
             return new Transaction(new NodeWrapper(response), gateway);
@@ -72,6 +91,9 @@ namespace Braintree
 
         public virtual async Task<Transaction> SettlementDeclineAsync(string id)
         {
+            if (StringUtil.IsInvalidPathSegment(id))
+                throw new NotFoundException();
+
             CheckEnvironment();
             XmlNode response = await service.PutAsync(service.MerchantPath() + "/transactions/" + id + "/settlement_decline").ConfigureAwait(false);
             return new Transaction(new NodeWrapper(response), gateway);

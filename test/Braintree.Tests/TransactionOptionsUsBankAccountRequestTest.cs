@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Braintree.TestUtil;
 
 namespace Braintree.Tests
 {
@@ -14,7 +15,7 @@ namespace Braintree.Tests
             };
 
             string xml = request.ToXml("us-bank-account");
-            Assert.IsTrue(xml.Contains("<ach-type>standard</ach-type>"));
+            TestHelper.AssertIncludes("<ach-type>standard</ach-type>", xml);
         }
 
         [Test]
@@ -38,7 +39,7 @@ namespace Braintree.Tests
             };
 
             string queryString = request.ToQueryString("us-bank-account");
-            Assert.IsTrue(queryString.Contains("ach_type"));
+            TestHelper.AssertIncludes("us_bank_account%5Bach_type%5D=standard", queryString);
         }
     }
 }

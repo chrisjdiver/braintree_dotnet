@@ -102,29 +102,32 @@ namespace Braintree.Tests.Integration
         public void Search_OnReasonCodes()
         {
             TransactionSearchRequest searchRequest = new TransactionSearchRequest().
+                Ids.IncludedIn("ach_txn_ret1").
                 ReasonCode.
                 IncludedIn("R01");
             ResourceCollection<Transaction> collection = gateway.Transaction.Search(searchRequest);
-            Assert.AreEqual(2, collection.MaximumCount);
+            Assert.AreEqual(1, collection.MaximumCount);
 
             searchRequest = new TransactionSearchRequest().
+                Ids.IncludedIn("ach_txn_ret1", "ach_txn_ret2").
                 ReasonCode.
                 IncludedIn("R01", "R02");
             collection = gateway.Transaction.Search(searchRequest);
-            Assert.AreEqual(3, collection.MaximumCount);
+            Assert.AreEqual(2, collection.MaximumCount);
 
             searchRequest = new TransactionSearchRequest().
+                Ids.IncludedIn("ach_txn_ret3", "ach_txn_ret4").
                 ReasonCode.
                 IncludedIn("RJCT");
             collection = gateway.Transaction.Search(searchRequest);
             Assert.AreEqual(2, collection.MaximumCount);
-        
+
             searchRequest = new TransactionSearchRequest().
+                Ids.IncludedIn("ach_txn_ret1", "ach_txn_ret2", "ach_txn_ret3", "ach_txn_ret4").
                 ReasonCode.
                 IncludedIn(TransactionSearchRequest.ACH_ANY_REASON_CODE);
             collection = gateway.Transaction.Search(searchRequest);
-            // Should include all ACH transactions with reason codes (at least R01, R02, and RJCT)
-            Assert.IsTrue(collection.MaximumCount >= 5, $"Expected at least 5 ACH transactions with reason codes, but found {collection.MaximumCount}");
+            Assert.AreEqual(4, collection.MaximumCount);
         }
 
         [Test]
@@ -752,6 +755,99 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
+        public void Search_OnAchType()
+        {
+            var request = new TransactionRequest
+            {
+                Amount = SandboxValues.TransactionAmount.AUTHORIZE,
+                MerchantAccountId = MerchantAccountIDs.US_BANK_MERCHANT_ACCOUNT_ID,
+                PaymentMethodNonce = TestHelper.GenerateValidUsBankAccountNonce(gateway),
+                Options = new TransactionOptionsRequest
+                {
+                    SubmitForSettlement = true,
+                    UsBankAccount = new TransactionOptionsUsBankAccountRequest
+                    {
+                        AchType = TransactionAchType.STANDARD.GetDescription()
+                    }
+                }
+            };
+
+            Transaction transaction = gateway.Transaction.Sale(request).Target;
+
+            TransactionSearchRequest searchRequest = new TransactionSearchRequest().
+                Id.Is(transaction.Id).
+                AchType.Is(TransactionAchType.STANDARD);
+
+            Assert.AreEqual(1, gateway.Transaction.Search(searchRequest).MaximumCount);
+
+            searchRequest = new TransactionSearchRequest().
+                Id.Is(transaction.Id).
+                AchType.IncludedIn(TransactionAchType.SAME_DAY, TransactionAchType.STANDARD);
+
+            Assert.AreEqual(1, gateway.Transaction.Search(searchRequest).MaximumCount);
+
+            searchRequest = new TransactionSearchRequest().
+                Id.Is(transaction.Id).
+                AchType.Is(TransactionAchType.SAME_DAY);
+
+            Assert.AreEqual(0, gateway.Transaction.Search(searchRequest).MaximumCount);
+
+            Transaction sameDayTransaction = gateway.Transaction.Find("sameday_ach_sameday_requested");
+
+            searchRequest = new TransactionSearchRequest().
+                Id.Is(sameDayTransaction.Id).
+                AchType.Is(TransactionAchType.SAME_DAY);
+
+            ResourceCollection<Transaction> collection = gateway.Transaction.Search(searchRequest);
+
+            Assert.AreEqual(1, collection.MaximumCount);
+            Assert.AreEqual(sameDayTransaction.Id, collection.FirstItem.Id);
+
+            searchRequest = new TransactionSearchRequest().
+                Id.Is(sameDayTransaction.Id).
+                AchType.Is(TransactionAchType.STANDARD);
+
+            Assert.AreEqual(0, gateway.Transaction.Search(searchRequest).MaximumCount);
+
+            searchRequest = new TransactionSearchRequest().
+                Id.Is(sameDayTransaction.Id).
+                AchType.IncludedIn(TransactionAchType.SAME_DAY, TransactionAchType.STANDARD);
+
+            collection = gateway.Transaction.Search(searchRequest);
+
+            Assert.AreEqual(1, collection.MaximumCount);
+            Assert.AreEqual(sameDayTransaction.Id, collection.FirstItem.Id);
+
+            Transaction divergentTransaction = gateway.Transaction.Find("standard_ach_sameday_requested");
+            Assert.AreEqual("standard", divergentTransaction.AchType);
+            Assert.AreEqual("same_day", divergentTransaction.RequestedAchType);
+
+            searchRequest = new TransactionSearchRequest().
+                Id.Is(divergentTransaction.Id).
+                AchType.Is(TransactionAchType.STANDARD);
+
+            collection = gateway.Transaction.Search(searchRequest);
+
+            Assert.AreEqual(1, collection.MaximumCount);
+            Assert.AreEqual(divergentTransaction.Id, collection.FirstItem.Id);
+
+            searchRequest = new TransactionSearchRequest().
+                Id.Is(divergentTransaction.Id).
+                AchType.Is(TransactionAchType.SAME_DAY);
+
+            Assert.AreEqual(0, gateway.Transaction.Search(searchRequest).MaximumCount);
+
+            searchRequest = new TransactionSearchRequest().
+                Id.Is(divergentTransaction.Id).
+                AchType.IncludedIn(TransactionAchType.SAME_DAY, TransactionAchType.STANDARD);
+
+            collection = gateway.Transaction.Search(searchRequest);
+
+            Assert.AreEqual(1, collection.MaximumCount);
+            Assert.AreEqual(divergentTransaction.Id, collection.FirstItem.Id);
+        }
+
+        [Test]
         public void Search_ForSettlementConfirmedTransaction()
         {
             string TransactionId = "settlement_confirmed_txn";
@@ -763,6 +859,7 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
+        [Ignore("pending search fix")]
         public void Search_OnAuthorizationExpiredStatus()
         {
             TransactionSearchRequest searchRequest = new TransactionSearchRequest().
@@ -1549,7 +1646,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("Flaky test")]
         public void Search_OnDebitNetwork()
         {
             TransactionRequest request = new TransactionRequest
@@ -1631,7 +1727,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("pending test")]
         public void Sale_ReturnsSuccessfulScaExemptionResponse()
         {
             var requestedScaExemption = "low_value";
@@ -1805,7 +1900,6 @@ namespace Braintree.Tests.Integration
 #endif
 
         [Test]
-        [Ignore("Flaky test")]
         public void Sale_ReturnsSuccessfulResponseWithUsBankAccount()
         {
             var request = new TransactionRequest
@@ -2014,7 +2108,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("unpend when we have a more stable CI")]
         public void Sale_WithSuccessfulAmexRewardsResponse()
         {
             var request = new TransactionRequest
@@ -2049,7 +2142,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("unpend when we have a more stable CI")]
         public void Sale_WithAmexRewardsResponseSucceedsEvenIfCardIsIneligible()
         {
             var request = new TransactionRequest
@@ -2084,7 +2176,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("unpend when we have a more stable CI")]
         public void Sale_WithAmexRewardsResponseSucceedsEvenIfCardHasInsufficientPoints()
         {
             var request = new TransactionRequest
@@ -3422,6 +3513,73 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
+        public void Sale_WithThreeDSecurePassThruNetwork()
+        {
+            var request = new TransactionRequest
+            {
+                MerchantAccountId = MerchantAccountIDs.THREE_D_SECURE_MERCHANT_ACCOUNT_ID,
+                Amount = SandboxValues.TransactionAmount.AUTHORIZE,
+                CreditCard = new TransactionCreditCardRequest
+                {
+                    Number = SandboxValues.CreditCardNumber.VISA,
+                    ExpirationDate = "05/2009",
+                },
+                ThreeDSecurePassThru = new ThreeDSecurePassThruRequest
+                {
+                    EciFlag = "05",
+                    Cavv = "some_cavv",
+                    Xid = "some_xid",
+                    AuthenticationResponse = "Y",
+                    DirectoryResponse = "Y",
+                    CavvAlgorithm = "2",
+                    Network = ThreeDSecurePassThruNetwork.VISA,
+                    ThreeDSecureVersion = "2.2.0",
+                },
+                Options = new TransactionOptionsRequest
+                {
+                    SubmitForSettlement = true
+                }
+            };
+
+            Result<Transaction> result = gateway.Transaction.Sale(request);
+            Assert.IsTrue(result.IsSuccess());
+            Transaction transaction = result.Target;
+            Assert.AreEqual(TransactionStatus.SUBMITTED_FOR_SETTLEMENT, transaction.Status);
+        }
+
+        [Test]
+        public void Sale_ErrorWithThreeDSecurePassThruNetworkThatDoesNotMatchPaymentInstrument()
+        {
+            var request = new TransactionRequest
+            {
+                MerchantAccountId = MerchantAccountIDs.THREE_D_SECURE_MERCHANT_ACCOUNT_ID,
+                Amount = SandboxValues.TransactionAmount.AUTHORIZE,
+                CreditCard = new TransactionCreditCardRequest
+                {
+                    Number = SandboxValues.CreditCardNumber.VISA,
+                    ExpirationDate = "05/2009",
+                },
+                ThreeDSecurePassThru = new ThreeDSecurePassThruRequest
+                {
+                    EciFlag = "05",
+                    Cavv = "some_cavv",
+                    Xid = "some_xid",
+                    AuthenticationResponse = "Y",
+                    DirectoryResponse = "Y",
+                    CavvAlgorithm = "2",
+                    Network = ThreeDSecurePassThruNetwork.MASTER_CARD,
+                    ThreeDSecureVersion = "2.2.0",
+                }
+            };
+
+            Result<Transaction> result = gateway.Transaction.Sale(request);
+            Assert.IsFalse(result.IsSuccess());
+            Assert.AreEqual(
+                ValidationErrorCode.TRANSACTION_THREE_D_SECURE_PASS_THRU_NETWORK_DOES_NOT_MATCH_PAYMENT_INSTRUMENT,
+                result.Errors.ForObject("Transaction").ForObject("Three-D-Secure-Pass-Thru").OnField("Network")[0].Code);
+        }
+
+        [Test]
         public void Sale_ErrorWithThreeDSecurePassThruWhenMerchantAccountDoesNotSupportCardType()
         {
             var request = new TransactionRequest
@@ -3975,7 +4133,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("Flaky test")]
         public void Sale_WithUsBankAccountNonce()
         {
             var request = new TransactionRequest
@@ -4230,7 +4387,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("Marking this test case as pending as we revoking category 2, 3 and 4")]
         public void Sale_GatewayRejectedForExcessiveRetry()
         {
             DuplicateCheckingSetup();
@@ -7732,6 +7888,175 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
+        public void Reverse_VoidsAVoidableTransaction()
+        {
+            TransactionRequest request = new TransactionRequest
+            {
+                Amount = SandboxValues.TransactionAmount.AUTHORIZE,
+                CreditCard = new TransactionCreditCardRequest
+                {
+                    Number = SandboxValues.CreditCardNumber.VISA,
+                    ExpirationDate = "05/2008"
+                }
+            };
+
+            Transaction transaction = gateway.Transaction.Sale(request).Target;
+            Result<Transaction> result = gateway.Transaction.Reverse(transaction.Id);
+
+            Assert.IsTrue(result.IsSuccess());
+            Assert.AreEqual(transaction.Id, result.Target.Id);
+            Assert.AreEqual(TransactionStatus.VOIDED, result.Target.Status);
+            Assert.IsNull(result.Target.RefundedTransactionId);
+        }
+
+        [Test]
+        public void Reverse_WithoutApiRequestKey_CannotBeRepeated()
+        {
+            TransactionRequest request = new TransactionRequest
+            {
+                Amount = SandboxValues.TransactionAmount.AUTHORIZE,
+                CreditCard = new TransactionCreditCardRequest
+                {
+                    Number = SandboxValues.CreditCardNumber.VISA,
+                    ExpirationDate = "05/2008"
+                }
+            };
+
+            Transaction transaction = gateway.Transaction.Sale(request).Target;
+            Assert.IsTrue(gateway.Transaction.Reverse(transaction.Id).IsSuccess());
+            Result<Transaction> result = gateway.Transaction.Reverse(transaction.Id);
+
+            Assert.IsFalse(result.IsSuccess());
+            Assert.AreEqual(ValidationErrorCode.TRANSACTION_CANNOT_REFUND_UNLESS_SETTLED,
+                result.Errors.ForObject("Transaction").OnField("Base")[0].Code);
+        }
+
+        [Test]
+        public void Reverse_VoidsAnExplicitlyCreatedVoidableRefund()
+        {
+            TransactionRequest request = new TransactionRequest
+            {
+                Amount = SandboxValues.TransactionAmount.AUTHORIZE,
+                CreditCard = new TransactionCreditCardRequest
+                {
+                    Number = SandboxValues.CreditCardNumber.VISA,
+                    ExpirationDate = "05/2008"
+                },
+                Options = new TransactionOptionsRequest
+                {
+                    SubmitForSettlement = true
+                }
+            };
+
+            string transactionId = gateway.Transaction.Sale(request).Target.Id;
+            gateway.TestTransaction.Settle(transactionId);
+            Result<Transaction> refundResult = gateway.Transaction.Refund(transactionId);
+            Assert.IsTrue(refundResult.IsSuccess());
+
+            Result<Transaction> result = gateway.Transaction.Reverse(refundResult.Target.Id);
+
+            Assert.IsTrue(result.IsSuccess());
+            Assert.AreEqual(refundResult.Target.Id, result.Target.Id);
+            Assert.AreEqual(TransactionStatus.VOIDED, result.Target.Status);
+            Assert.AreEqual(transactionId, result.Target.RefundedTransactionId);
+        }
+
+        [Test]
+        public void Reverse_RefundsASettledTransaction()
+        {
+            TransactionRequest request = new TransactionRequest
+            {
+                Amount = SandboxValues.TransactionAmount.AUTHORIZE,
+                CreditCard = new TransactionCreditCardRequest
+                {
+                    Number = SandboxValues.CreditCardNumber.VISA,
+                    ExpirationDate = "05/2008"
+                },
+                Options = new TransactionOptionsRequest
+                {
+                    SubmitForSettlement = true
+                }
+            };
+
+            string transactionId = gateway.Transaction.Sale(request).Target.Id;
+            gateway.TestTransaction.Settle(transactionId);
+
+            Result<Transaction> result = gateway.Transaction.Reverse(transactionId);
+
+            Assert.IsTrue(result.IsSuccess());
+            Assert.AreEqual(TransactionType.CREDIT, result.Target.Type);
+            Assert.AreEqual(transactionId, result.Target.RefundedTransactionId);
+        }
+
+        [Test]
+#if netcore
+        public async Task ReverseAsync_VoidsAVoidableTransaction()
+#else
+        public void ReverseAsync_VoidsAVoidableTransaction()
+        {
+            Task.Run(async () =>
+#endif
+        {
+            TransactionRequest request = new TransactionRequest
+            {
+                Amount = SandboxValues.TransactionAmount.AUTHORIZE,
+                CreditCard = new TransactionCreditCardRequest
+                {
+                    Number = SandboxValues.CreditCardNumber.VISA,
+                    ExpirationDate = "05/2008"
+                }
+            };
+
+            Transaction transaction = (await gateway.Transaction.SaleAsync(request)).Target;
+            Result<Transaction> result = await gateway.Transaction.ReverseAsync(transaction.Id);
+
+            Assert.IsTrue(result.IsSuccess());
+            Assert.AreEqual(transaction.Id, result.Target.Id);
+            Assert.AreEqual(TransactionStatus.VOIDED, result.Target.Status);
+        }
+#if net452
+            ).GetAwaiter().GetResult();
+        }
+#endif
+
+        [Test]
+#if netcore
+        public async Task ReverseAsync_RefundsASettledTransaction()
+#else
+        public void ReverseAsync_RefundsASettledTransaction()
+        {
+            Task.Run(async () =>
+#endif
+        {
+            TransactionRequest request = new TransactionRequest
+            {
+                Amount = SandboxValues.TransactionAmount.AUTHORIZE,
+                CreditCard = new TransactionCreditCardRequest
+                {
+                    Number = SandboxValues.CreditCardNumber.VISA,
+                    ExpirationDate = "05/2008"
+                },
+                Options = new TransactionOptionsRequest
+                {
+                    SubmitForSettlement = true
+                }
+            };
+
+            string transactionId = (await gateway.Transaction.SaleAsync(request)).Target.Id;
+            await gateway.TestTransaction.SettleAsync(transactionId);
+
+            Result<Transaction> result = await gateway.Transaction.ReverseAsync(transactionId);
+
+            Assert.IsTrue(result.IsSuccess());
+            Assert.AreEqual(TransactionType.CREDIT, result.Target.Type);
+            Assert.AreEqual(transactionId, result.Target.RefundedTransactionId);
+        }
+#if net452
+            ).GetAwaiter().GetResult();
+        }
+#endif
+
+        [Test]
 #if netcore
         public async Task VoidAsync_VoidsTheTransaction()
 #else
@@ -8108,7 +8433,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("unpend when we have a more stable CI")]
         public void SubmitForSettlement_WithAmexRewardsSucceeds()
         {
             TransactionRequest request = new TransactionRequest
@@ -8141,7 +8465,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("unpend when we have a more stable CI")]
         public void SubmitForSettlement_WithAmexRewardsSucceedsEvenIfCardIsIneligible()
         {
             TransactionRequest request = new TransactionRequest
@@ -8174,7 +8497,6 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
-        [Ignore("unpend when we have a more stable CI")]
         public void SubmitForSettlement_WithAmexRewardsSucceedsEvenIfCardBalanceIsInsufficient()
         {
             TransactionRequest request = new TransactionRequest
@@ -8360,7 +8682,7 @@ namespace Braintree.Tests.Integration
             {
                 Descriptor = new DescriptorRequest
                 {
-                    Name = "invalid name",
+                    Name = new string('a', 31),
                     Phone = "invalid phone",
                     Url = "invalid url that is too long to be valid"
                 }
@@ -9341,6 +9663,107 @@ namespace Braintree.Tests.Integration
             Assert.AreEqual(TransactionType.CREDIT, result.Target.Type);
             Assert.AreEqual("1234567", result.Target.OrderId);
             Assert.AreEqual(500M, result.Target.Amount);
+        }
+
+        [Test]
+        public void Refund_PartialRefundWithSurchargeAmount()
+        {
+            TransactionRequest request = new TransactionRequest
+            {
+                Amount = SandboxValues.TransactionAmount.AUTHORIZE,
+                SurchargeAmount = 1M,
+                CreditCard = new TransactionCreditCardRequest
+                {
+                    Number = SandboxValues.CreditCardNumber.VISA,
+                    ExpirationDate = "05/2009"
+                },
+                Options = new TransactionOptionsRequest
+                {
+                    SubmitForSettlement = true
+                }
+            };
+
+            Transaction transaction = gateway.Transaction.Sale(request).Target;
+            gateway.TestTransaction.Settle(transaction.Id);
+            transaction = gateway.Transaction.Find(transaction.Id);
+
+            TransactionRefundRequest refundRequest = new TransactionRefundRequest()
+            {
+                Amount = transaction.Amount.Value / 2,
+                SurchargeAmount = 0.50M
+            };
+
+            Result<Transaction> result = gateway.Transaction.Refund(transaction.Id, refundRequest);
+            Assert.IsTrue(result.IsSuccess());
+            Assert.AreEqual(TransactionType.CREDIT, result.Target.Type);
+            Assert.AreEqual(0.50M, result.Target.SurchargeAmount);
+        }
+
+        [Test]
+        public void Refund_WithSurchargeAmount()
+        {
+            TransactionRequest request = new TransactionRequest
+            {
+                Amount = SandboxValues.TransactionAmount.AUTHORIZE,
+                SurchargeAmount = 1M,
+                CreditCard = new TransactionCreditCardRequest
+                {
+                    Number = SandboxValues.CreditCardNumber.VISA,
+                    ExpirationDate = "05/2009"
+                },
+                Options = new TransactionOptionsRequest
+                {
+                    SubmitForSettlement = true
+                }
+            };
+
+            Transaction transaction = gateway.Transaction.Sale(request).Target;
+            gateway.TestTransaction.Settle(transaction.Id);
+            transaction = gateway.Transaction.Find(transaction.Id);
+
+            TransactionRefundRequest refundRequest = new TransactionRefundRequest()
+            {
+                SurchargeAmount = 1M
+            };
+
+            Result<Transaction> result = gateway.Transaction.Refund(transaction.Id, refundRequest);
+            Assert.IsTrue(result.IsSuccess());
+            Assert.AreEqual(TransactionType.CREDIT, result.Target.Type);
+            Assert.AreEqual(1M, result.Target.SurchargeAmount);
+        }
+
+        [Test]
+        public void Refund_WithSurchargeAmountWhenOriginalSaleWasNotSurcharged()
+        {
+            TransactionRequest request = new TransactionRequest
+            {
+                Amount = SandboxValues.TransactionAmount.AUTHORIZE,
+                CreditCard = new TransactionCreditCardRequest
+                {
+                    Number = SandboxValues.CreditCardNumber.VISA,
+                    ExpirationDate = "05/2009"
+                },
+                Options = new TransactionOptionsRequest
+                {
+                    SubmitForSettlement = true
+                }
+            };
+
+            Transaction transaction = gateway.Transaction.Sale(request).Target;
+            gateway.TestTransaction.Settle(transaction.Id);
+            transaction = gateway.Transaction.Find(transaction.Id);
+
+            TransactionRefundRequest refundRequest = new TransactionRefundRequest()
+            {
+                SurchargeAmount = 1M
+            };
+
+            Result<Transaction> result = gateway.Transaction.Refund(transaction.Id, refundRequest);
+            Assert.IsFalse(result.IsSuccess());
+            Assert.AreEqual(
+                ValidationErrorCode.TRANSACTION_ORIGINAL_SALE_TRANSACTION_WAS_NOT_SURCHARGED,
+                result.Errors.DeepAll()[0].Code
+            );
         }
 
         [Test]

@@ -29,5 +29,19 @@ namespace Braintree
                 Replace("-", "_").
                 ToLower();
         }
+
+        // Valid path segments are validated against an allowlist of the characters
+        // that make up a Braintree id/token. Anything outside that set (path
+        // separators, percent-encoding, query/fragment characters, dots,
+        // whitespace, control characters, etc.) is rejected.
+        private static readonly Regex ValidPathSegmentRegex = new Regex(@"^[A-Za-z0-9_-]+$");
+
+        public static bool IsInvalidPathSegment(string value)
+        {
+            if (value == null)
+                return true;
+
+            return !ValidPathSegmentRegex.IsMatch(value);
+        }
     }
 }

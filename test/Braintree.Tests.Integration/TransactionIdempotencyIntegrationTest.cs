@@ -288,6 +288,39 @@ namespace Braintree.Tests.Integration
         }
 
         [Test]
+        public void Reverse_WithApiRequestKey_ReturnsOriginalReverseOnDuplicateRequest()
+        {
+            string apiRequestKey = "reverse-idempotency-key-" + new Random().Next(1000000);
+
+            var saleRequest = new TransactionRequest
+            {
+                Amount = SandboxValues.TransactionAmount.AUTHORIZE,
+                CreditCard = new TransactionCreditCardRequest
+                {
+                    Number = SandboxValues.CreditCardNumber.VISA,
+                    ExpirationDate = "05/2035"
+                }
+            };
+
+            Result<Transaction> saleResult = gateway.Transaction.Sale(saleRequest);
+            Assert.IsTrue(saleResult.IsSuccess());
+            string transactionId = saleResult.Target.Id;
+
+            var reverseRequest = new TransactionReverseRequest
+            {
+                ApiRequestKey = apiRequestKey
+            };
+
+            Result<Transaction> reverseResult1 = gateway.Transaction.Reverse(transactionId, reverseRequest);
+            Assert.IsTrue(reverseResult1.IsSuccess());
+
+            Result<Transaction> reverseResult2 = gateway.Transaction.Reverse(transactionId, reverseRequest);
+            Assert.IsTrue(reverseResult2.IsSuccess());
+            Assert.AreEqual(reverseResult1.Target.Id, reverseResult2.Target.Id);
+            Assert.AreEqual(TransactionStatus.VOIDED, reverseResult2.Target.Status);
+        }
+
+        [Test]
         public void Refund_WithApiRequestKey_ReturnsOriginalRefundOnDuplicateRequest()
         {
             string apiRequestKey = "refund-idempotency-key-" + new Random().Next(1000000);
